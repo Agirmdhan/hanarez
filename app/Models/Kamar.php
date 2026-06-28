@@ -15,7 +15,8 @@ class Kamar extends Model
     public function penghuni(): HasOne
     {
         return $this->hasOne(User::class, 'id_kamar', 'id_kamar')
-            ->where('role', 'penghuni');
+            ->where('role', 'penghuni')
+            ->where('status_pendaftaran', 'aktif');
     }
 
     public function users(): HasMany

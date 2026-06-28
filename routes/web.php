@@ -12,20 +12,19 @@ use App\Http\Controllers\ProfileController;
 use App\Models\Kamar;
 
 Route::get('/', function () {
-    // Mengambil semua data kamar dari database
-    $kamars = Kamar::all(); 
-    
-    return view('welcome', compact('kamars'));
-});
+    if (\Illuminate\Support\Facades\Schema::hasTable('kamars')) {
+        \App\Models\Kamar::ensureDefaultRooms();
 
-// 1. Halaman Publik
-Route::get('/', function () {
-    $kamars = \App\Models\Kamar::query()
-        ->orderByRaw("CAST(nomor_kamar AS UNSIGNED), nomor_kamar")
-        ->get();
+        $kamars = Kamar::query()
+            ->orderByRaw("CAST(nomor_kamar AS UNSIGNED), nomor_kamar")
+            ->get();
+    } else {
+        $kamars = collect();
+    }
 
     return view('welcome', compact('kamars'));
 });
+
 
 // 2. Rute Profile (BAGIAN INI YANG KURANG)
 Route::middleware('auth')->group(function () {
@@ -37,11 +36,13 @@ Route::middleware('auth')->group(function () {
 // 3. Rute Admin
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+    Route::patch('/penghuni/{penghuni}/remind', [AdminDashboardController::class, 'remind'])->name('admin.penghuni.remind');
 
     Route::get('/kamar', [KamarController::class, 'index'])->name('admin.kamar.index');
     Route::post('/kamar', [KamarController::class, 'store'])->name('admin.kamar.store');
     Route::put('/kamar/{kamar}', [KamarController::class, 'update'])->name('admin.kamar.update');
     Route::patch('/pembayaran/{pembayaran}/verify', [AdminPembayaranController::class, 'verify'])->name('admin.pembayaran.verify');
+    Route::patch('/pembayaran/{pembayaran}/reject', [AdminPembayaranController::class, 'reject'])->name('admin.pembayaran.reject');
     Route::patch('/laporan/{laporan}/complete', [AdminLaporanController::class, 'complete'])->name('admin.laporan.complete');
     Route::delete('/penghuni/{penghuni}', [AdminPenghuniController::class, 'destroy'])->name('admin.penghuni.destroy');
 });
@@ -51,13 +52,26 @@ Route::middleware(['auth', 'role:penghuni'])->prefix('penghuni')->group(function
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
+        $pembayaranTerbaru = $user->pembayarans()
+            ->orderByDesc('bulan')
+            ->first();
+
+        $tagihanAktif = $pembayaranTerbaru && $pembayaranTerbaru->status === 'menunggu'
+            ? $pembayaranTerbaru
+            : null;
+
         return view('penghuni.dashboard', [
-            'pembayaranBulanIni' => $user->pembayaranBulanIni,
+            'pembayaranBulanIni' => $pembayaranTerbaru,
+            'tagihanAktif' => $tagihanAktif,
             'laporanAktif' => $user->laporanAktif()->latest()->get(),
             'laporanTerkirim' => $user->laporans()->count(),
             'nominalTagihan' => 1900000,
         ]);
     })->name('penghuni.dashboard');
+
+    Route::get('/pembayaran/pending', function () {
+        return view('penghuni.pembayaran-awal');
+    })->name('penghuni.pembayaran.pending');
 
     Route::post('/pembayaran', [PenghuniPembayaranController::class, 'store'])->name('penghuni.pembayaran.store');
     Route::post('/laporan', [PenghuniLaporanController::class, 'store'])->name('penghuni.laporan.store');
@@ -68,7 +82,7 @@ require __DIR__.'/auth.php';
 
 // Rute Jembatan (Fix untuk error sebelumnya)
 Route::get('/dashboard', function () {
-    return auth()->user()->role === 'admin' 
-        ? redirect()->route('admin.dashboard') 
+    return auth()->user()->role === 'admin'
+        ? redirect()->route('admin.dashboard')
         : redirect()->route('penghuni.dashboard');
 })->middleware(['auth'])->name('dashboard');

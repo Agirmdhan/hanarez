@@ -8,7 +8,10 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -36,46 +39,61 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        Kamar::ensureDefaultRooms();
+        if (Schema::hasTable('kamars')) {
+            Kamar::ensureDefaultRooms();
+        }
 
-        if (User::where('role', 'penghuni')->count() >= 6) {
+        if (Schema::hasTable('kamars') && User::where('role', 'penghuni')->where('status_pendaftaran', 'aktif')->count() >= 6) {
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['email' => 'Kamar sudah penuh. Maksimal hanya 6 penghuni yang bisa terdaftar.']);
+                ->withErrors(['email' => 'Kamar aktif sudah penuh.']);
         }
 
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'kamar_id' => ['required', 'exists:kamars,id_kamar'],
+            'kamar_id' => ['nullable', 'exists:kamars,id_kamar'],
         ]);
 
-        $kamar = Kamar::where('id_kamar', $request->kamar_id)
-            ->where('status', 'Tersedia')
-            ->first();
+        $kamar = null;
+
+        if ($request->filled('kamar_id')) {
+            $kamar = Kamar::where('id_kamar', $request->kamar_id)
+                ->where('status', 'Tersedia')
+                ->first();
+        } elseif (Schema::hasTable('kamars')) {
+            $occupiedRoomIds = User::whereNotNull('id_kamar')->pluck('id_kamar')->all();
+
+            $kamar = Kamar::where('status', 'Tersedia')
+                ->whereNotIn('id_kamar', $occupiedRoomIds)
+                ->orderByRaw("CAST(nomor_kamar AS UNSIGNED), nomor_kamar")
+                ->first();
+        }
 
         if (! $kamar) {
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['kamar_id' => 'Kamar yang dipilih sudah tidak tersedia.']);
+                ->withErrors(['email' => 'Kamar yang dipilih sudah tidak tersedia.']);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'id_kamar' => $kamar->id_kamar,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role' => 'penghuni',
-            'status' => 'aktif',
-        ]);
+        DB::transaction(function () use ($request, $kamar) {
+            $user = User::create([
+                'name' => $request->name,
+                'id_kamar' => $kamar->id_kamar,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role' => 'penghuni',
+                'status' => 'aktif',
+                'status_pendaftaran' => 'pending',
+                'payment_deadline' => now()->addMinutes(5),
+            ]);
 
-        $kamar->update(['status' => 'Terisi']);
-
-        event(new Registered($user));
+            event(new Registered($user));
+        });
 
         return redirect()
             ->route('login')
-            ->with('status', 'Registrasi berhasil. Silakan login dengan akun yang baru dibuat.');
+            ->with('status', 'Registrasi berhasil. Silakan login untuk melanjutkan pembayaran.');
     }
 }

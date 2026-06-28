@@ -19,6 +19,9 @@ return new class extends Migration
             $table->string('password'); // Menyimpan password (hash)[cite: 1]
             $table->enum('role', ['admin', 'penghuni'])->default('penghuni'); // Hak akses peran[cite: 1]
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif'); // Status akun[cite: 1]
+            $table->enum('status_pendaftaran', ['pending', 'aktif', 'expired'])->default('pending');
+            $table->timestamp('payment_deadline')->nullable();
+            $table->timestamp('payment_completed_at')->nullable();
             $table->rememberToken();
             $table->timestamps(); // Mengelola created_at dan updated_at[cite: 1]
         });
@@ -44,8 +47,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('users');
     }
 };

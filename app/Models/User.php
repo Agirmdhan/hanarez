@@ -21,12 +21,15 @@ class User extends Authenticatable
     // Mendefinisikan kolom yang boleh diisi (mass assignable)
     protected $fillable = [
         'name',
-        'nama', 
+        'nama',
         'id_kamar',
-        'email', 
-        'password', 
-        'role', 
+        'email',
+        'password',
+        'role',
         'status',
+        'status_pendaftaran',
+        'payment_deadline',
+        'payment_completed_at',
     ];
 
     // Menyembunyikan kolom sensitif

@@ -8,8 +8,9 @@
     @php
         $user = auth()->user();
         $kamar = $user->kamar?->nomor_kamar ?? '-';
+        $tagihanAktif = $tagihanAktif ?? null;
         $tagihanLunas = $pembayaranBulanIni?->status === 'lunas';
-        $tagihanTampil = $tagihanLunas ? 0 : $nominalTagihan;
+        $tagihanTampil = $tagihanAktif ? $nominalTagihan : 0;
     @endphp
 
     <style>
@@ -463,7 +464,22 @@
                 <section class="resident-card resident-stat">
                     <div>
                         <p class="resident-stat-label">Tagihan<br>Bulan Ini</p>
-                        <p class="resident-stat-value">Rp {{ number_format($tagihanTampil, 0, ',', '.') }}</p>
+                        @if ($tagihanAktif)
+                            <p class="resident-stat-value">Rp {{ number_format($tagihanTampil, 0, ',', '.') }}</p>
+                            <p class="mt-2 text-sm font-semibold text-amber-700">
+                                Tagihan aktif: {{ $tagihanAktif->bulan }}
+                            </p>
+                        @elseif ($tagihanLunas)
+                            <p class="resident-stat-value text-green-700">Lunas</p>
+                            <p class="mt-2 text-sm font-semibold text-green-700">
+                                Tidak ada tagihan aktif bulan ini.
+                            </p>
+                        @else
+                            <p class="resident-stat-value">Rp 0</p>
+                            <p class="mt-2 text-sm font-semibold text-gray-500">
+                                Belum ada tagihan aktif.
+                            </p>
+                        @endif
                     </div>
                     <span class="resident-stat-icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -511,12 +527,16 @@
                     </div>
 
                     <h4>Informasi Pembayaran</h4>
-                    @if (! $pembayaranBulanIni)
-                        <p>Belum ada bukti pembayaran untuk bulan ini.</p>
-                    @elseif ($pembayaranBulanIni->status === 'menunggu')
-                        <p>Bukti pembayaran sudah dikirim dan menunggu verifikasi admin.</p>
-                    @else
+                    @if ($tagihanAktif)
+                        @if ($tagihanAktif->bukti_pembayaran)
+                            <p>Bukti pembayaran sudah dikirim dan menunggu verifikasi admin.</p>
+                        @else
+                            <p>Tagihan bulan aktif sudah dibuat dan belum dibayar.</p>
+                        @endif
+                    @elseif ($tagihanLunas)
                         <p>Pembayaran bulan ini sudah lunas.</p>
+                    @else
+                        <p>Belum ada tagihan aktif.</p>
                     @endif
 
                     <ul class="resident-list">
@@ -531,7 +551,11 @@
                         <span class="resident-badge">Sewa</span>
                     </div>
 
-                    @if ($pembayaranBulanIni)
+                    @if ($tagihanAktif && $tagihanAktif->bukti_pembayaran)
+                        <a href="{{ asset('storage/'.$tagihanAktif->bukti_pembayaran) }}" target="_blank" class="resident-proof">
+                            Lihat bukti PNG
+                        </a>
+                    @elseif ($pembayaranBulanIni && $pembayaranBulanIni->status === 'lunas' && $pembayaranBulanIni->bukti_pembayaran)
                         <a href="{{ asset('storage/'.$pembayaranBulanIni->bukti_pembayaran) }}" target="_blank" class="resident-proof">
                             Lihat bukti PNG
                         </a>

@@ -49,9 +49,6 @@
                     <a href="{{ url('/dashboard') }}" class="px-5 py-2 text-sm font-semibold text-white bg-blue-500 rounded-md hover:bg-blue-600">Dashboard</a>
                 @else
                     <a href="{{ route('login') }}" class="px-5 py-2 text-sm font-semibold text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">Login</a>
-                    @if (Route::has('register'))
-                        <a href="{{ route('register') }}" class="px-5 py-2 text-sm font-semibold text-white bg-[#337AB7] rounded-md hover:bg-blue-700">Register</a>
-                    @endif
                 @endauth
             @endif
         </div>
