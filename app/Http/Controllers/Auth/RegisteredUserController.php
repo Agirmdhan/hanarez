@@ -18,9 +18,15 @@ class RegisteredUserController extends Controller
     /**
      * Display the registration view.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('auth.register');
+        $selectedKamarId = $request->query('kamar');
+        $kamars = Kamar::query()
+            ->where('status', 'Tersedia')
+            ->orderByRaw("CAST(nomor_kamar AS UNSIGNED), nomor_kamar")
+            ->get();
+
+        return view('auth.register', compact('kamars', 'selectedKamarId'));
     }
 
     /**
@@ -42,18 +48,17 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'kamar_id' => ['required', 'exists:kamars,id_kamar'],
         ]);
 
-        $occupiedRoomIds = User::whereNotNull('id_kamar')->pluck('id_kamar');
-
-        $kamar = Kamar::whereNotIn('id_kamar', $occupiedRoomIds)
-            ->orderBy('nomor_kamar')
+        $kamar = Kamar::where('id_kamar', $request->kamar_id)
+            ->where('status', 'Tersedia')
             ->first();
 
         if (! $kamar) {
             return back()
                 ->withInput($request->except('password', 'password_confirmation'))
-                ->withErrors(['email' => 'Semua kamar sudah terisi.']);
+                ->withErrors(['kamar_id' => 'Kamar yang dipilih sudah tidak tersedia.']);
         }
 
         $user = User::create([

@@ -8,11 +8,23 @@ use App\Http\Controllers\Admin\PembayaranController as AdminPembayaranController
 use App\Http\Controllers\Admin\PenghuniController as AdminPenghuniController;
 use App\Http\Controllers\Penghuni\LaporanController as PenghuniLaporanController;
 use App\Http\Controllers\Penghuni\PembayaranController as PenghuniPembayaranController;
-use App\Http\Controllers\ProfileController; // <--- PASTIKAN INI ADA DI PALING ATAS
+use App\Http\Controllers\ProfileController;
+use App\Models\Kamar;
+
+Route::get('/', function () {
+    // Mengambil semua data kamar dari database
+    $kamars = Kamar::all(); 
+    
+    return view('welcome', compact('kamars'));
+});
 
 // 1. Halaman Publik
 Route::get('/', function () {
-    return view('welcome');
+    $kamars = \App\Models\Kamar::query()
+        ->orderByRaw("CAST(nomor_kamar AS UNSIGNED), nomor_kamar")
+        ->get();
+
+    return view('welcome', compact('kamars'));
 });
 
 // 2. Rute Profile (BAGIAN INI YANG KURANG)

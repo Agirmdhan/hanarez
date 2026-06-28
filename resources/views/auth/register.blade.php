@@ -16,6 +16,22 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- Kamar -->
+        <div class="mt-4">
+            <x-input-label for="kamar_id" value="Pilih Kamar" />
+            <select id="kamar_id" name="kamar_id" class="block mt-1 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
+                <option value="">-- Pilih kamar kosong --</option>
+                @isset($kamars)
+                    @foreach ($kamars as $kamar)
+                        <option value="{{ $kamar->id_kamar }}" @selected(old('kamar_id', request('kamar')) == $kamar->id_kamar)>
+                            Kamar {{ $kamar->nomor_kamar }} - {{ $kamar->tipe }}
+                        </option>
+                    @endforeach
+                @endisset
+            </select>
+            <x-input-error :messages="$errors->get('kamar_id')" class="mt-2" />
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
