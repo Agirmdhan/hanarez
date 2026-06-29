@@ -70,6 +70,13 @@ class User extends Authenticatable
             ->where('bulan', now()->format('Y-m'));
     }
 
+    public function pembayaranTagihanAktif(): HasOne
+    {
+        return $this->hasOne(Pembayaran::class, 'id_user', 'id_user')
+            ->where('status', 'menunggu')
+            ->latest('bulan');
+    }
+
     public function laporans(): HasMany
     {
         return $this->hasMany(Laporan::class, 'id_user', 'id_user');

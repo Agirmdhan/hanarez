@@ -107,7 +107,9 @@
                 @foreach ($kamars as $kamar)
                     @php
                         $penghuni = $kamar->penghuni;
-                        $pembayaran = $penghuni?->pembayaranBulanIni;
+                        // Prioritaskan tagihan aktif (status=menunggu, dari remind bulan depan)
+                        // Fallback ke pembayaran bulan ini
+                        $pembayaran = $penghuni?->pembayaranTagihanAktif ?? $penghuni?->pembayaranBulanIni;
                         $laporans = $penghuni?->laporanAktif ?? collect();
                     @endphp
 

@@ -444,10 +444,14 @@
             <div class="resident-top-grid">
                 <section class="resident-card resident-welcome">
                     <div class="resident-welcome-inner">
-                        <div>
-                            <h3>Selamat datang, {{ $user->name }}</h3>
+                    <div>
+                        <h3>Selamat datang, {{ $user->name }}</h3>
+                        @if ($user->status_pendaftaran === 'pending')
+                            <p>Kamar {{ $kamar }}. Akun Anda masih dalam status pending. Silakan upload bukti pembayaran untuk mengaktivasi akun.</p>
+                        @else
                             <p>Kamar {{ $kamar }}. Akun Anda sudah aktif sebagai penghuni.</p>
-                        </div>
+                        @endif
+                    </div>
                         <svg class="resident-person" viewBox="0 0 180 128" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                             <circle cx="118" cy="38" r="24" fill="#F2B08B"/>
                             <path d="M86 99c8-34 57-34 65 0l5 24H81l5-24Z" fill="#4F86BC"/>
@@ -565,11 +569,12 @@
                         @csrf
                         <label class="resident-upload">
                             Unggah Bukti
-                            <input type="file" name="bukti_pembayaran" accept="image/png" required onchange="this.form.submit()">
+                            <input type="file" name="bukti_pembayaran" accept="image/png" required onchange="document.getElementById('nama-file').textContent = this.files[0]?.name || 'Belum ada file dipilih';">
                         </label>
                         <button class="resident-button" type="submit">
                             Bayar Sekarang
                         </button>
+                        <div style="grid-column: 1 / -1; font-size: 13px; text-align: center; color: #6b7280; margin-top: -4px;" id="nama-file">Belum ada file dipilih</div>
                     </form>
                 </section>
 

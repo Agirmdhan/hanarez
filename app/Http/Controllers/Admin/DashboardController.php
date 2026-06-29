@@ -55,6 +55,7 @@ class DashboardController extends Controller
 
         $currentMonth = now()->format('Y-m');
         $kamars = Kamar::with([
+            'penghuni.pembayaranTagihanAktif',
             'penghuni.pembayaranBulanIni',
             'penghuni.pembayarans' => fn ($query) => $query->orderByDesc('bulan'),
             'penghuni.laporanAktif' => fn ($query) => $query->latest(),

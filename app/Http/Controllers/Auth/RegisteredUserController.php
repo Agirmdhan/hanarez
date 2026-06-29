@@ -90,10 +90,13 @@ class RegisteredUserController extends Controller
             ]);
 
             event(new Registered($user));
+
+            // Auto login user after registration
+            Auth::login($user);
         });
 
         return redirect()
-            ->route('login')
-            ->with('status', 'Registrasi berhasil. Silakan login untuk melanjutkan pembayaran.');
+            ->route('penghuni.pembayaran.pending')
+            ->with('status', 'Registrasi berhasil. Silakan lakukan pembayaran awal untuk mengkonfirmasi keikutsertaan Anda.');
     }
 }

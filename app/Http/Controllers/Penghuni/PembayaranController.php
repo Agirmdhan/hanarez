@@ -28,31 +28,33 @@ class PembayaranController extends Controller
         $path = $request->file('bukti_pembayaran')->store('bukti-pembayaran', 'public');
 
         DB::transaction(function () use ($request, $user, $path) {
-            Pembayaran::updateOrCreate(
-                [
+            // Cari tagihan yang masih menunggu (bisa dari remind bulan ini/bulan depan)
+            $tagihanMenunggu = Pembayaran::where('id_user', $user->id_user)
+                ->where('status', 'menunggu')
+                ->latest('bulan')
+                ->first();
+
+            if ($tagihanMenunggu) {
+                // Update tagihan yang sudah ada dengan bukti pembayaran
+                $tagihanMenunggu->update([
+                    'bukti_pembayaran' => $path,
+                ]);
+            } else {
+                // Tidak ada tagihan menunggu, buat baru di bulan ini
+                Pembayaran::create([
                     'id_user' => $user->id_user,
                     'bulan' => now()->format('Y-m'),
-                ],
-                [
                     'bukti_pembayaran' => $path,
                     'status' => 'menunggu',
-                ],
-            );
-
-            if ($user->status_pendaftaran === 'pending') {
-                $user->update([
-                    'status_pendaftaran' => 'aktif',
-                    'payment_completed_at' => now(),
-                ]);
-
-                Kamar::where('id_kamar', $user->id_kamar)->update([
-                    'status' => 'Terisi',
                 ]);
             }
+
+            // User stays in pending status until admin verifies
+            // No automatic status change here
         });
 
         return redirect()
             ->route('penghuni.dashboard')
-            ->with('success', 'Bukti pembayaran berhasil dikirim dan status calon penghuni sudah diaktifkan.');
+            ->with('success', 'Bukti pembayaran berhasil dikirim. Silakan tunggu admin memverifikasi pembayaran Anda.');
     }
 }

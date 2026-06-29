@@ -52,16 +52,19 @@ Route::middleware(['auth', 'role:penghuni'])->prefix('penghuni')->group(function
     Route::get('/dashboard', function () {
         $user = auth()->user();
 
-        $pembayaranTerbaru = $user->pembayarans()
+        // Cari tagihan aktif = pembayaran status 'menunggu' terbaru
+        // Bisa dari bulan ini (aktivasi) atau bulan depan (setelah remind)
+        $tagihanAktif = $user->pembayarans()
+            ->where('status', 'menunggu')
             ->orderByDesc('bulan')
             ->first();
 
-        $tagihanAktif = $pembayaranTerbaru && $pembayaranTerbaru->status === 'menunggu'
-            ? $pembayaranTerbaru
-            : null;
+        // Jika ada tagihan aktif, pakai itu sebagai pembayaran yang ditampilkan
+        // Jika tidak ada, pakai pembayaran bulan ini (mungkin lunas)
+        $pembayaranBulanIni = $tagihanAktif ?? $user->pembayaranBulanIni;
 
         return view('penghuni.dashboard', [
-            'pembayaranBulanIni' => $pembayaranTerbaru,
+            'pembayaranBulanIni' => $pembayaranBulanIni,
             'tagihanAktif' => $tagihanAktif,
             'laporanAktif' => $user->laporanAktif()->latest()->get(),
             'laporanTerkirim' => $user->laporans()->count(),
