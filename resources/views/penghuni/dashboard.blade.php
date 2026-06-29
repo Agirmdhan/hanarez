@@ -431,6 +431,15 @@
                 </div>
             @endif
 
+            @php
+                $peringatanKey = 'peringatan_tolak_' . $user->id_user;
+            @endphp
+            @if (session($peringatanKey))
+                <div class="resident-alert error">
+                    {{ session($peringatanKey) }}
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="resident-alert error">
                     <ul>

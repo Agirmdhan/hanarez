@@ -29,18 +29,13 @@
     <!-- Navbar -->
     <nav class="bg-white border-b border-gray-100 py-4 px-8 md:px-16 flex items-center justify-between sticky top-0 z-50">
         <div class="flex items-center gap-2">
-            <div class="flex items-center text-blue-500">
-                <svg class="w-7 h-7" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 21V9H8V21H4ZM10 21V5H18V21H10ZM12 7H16V9H12V7ZM12 11H16V13H12V11ZM12 15H16V17H12V15ZM6 11H8V13H6V11ZM6 15H8V17H6V15Z" fill="#3B82F6"/>
-                    <circle cx="19.5" cy="18.5" r="2.5" fill="#10B981"/>
-                </svg>
-            </div>
+            <img src="https://g.top4top.io/p_3832whs151.png" alt="Hanarez" class="w-7 h-7 object-contain">
             <span class="text-xl font-bold text-gray-900 tracking-tight">Hanarez</span>
         </div>
 
         <div class="hidden md:flex items-center gap-10">
             <a href="/" class="text-sm font-semibold text-blue-500">Home</a>
-            <a href="#contact" class="text-sm font-medium text-gray-600 hover:text-blue-500">Contact</a>
+            <a href="https://wa.me/6281234567890" target="_blank" class="text-sm font-medium text-gray-600 hover:text-blue-500">Contact</a>
         </div>
 
         <div class="flex items-center gap-3">
@@ -67,7 +62,7 @@
             </p>
         </div>
         <div class="w-full md:w-1/2 flex justify-end">
-            <img src="{{ asset('images/kos.png') }}" alt="Ilustrasi" class="w-full max-w-lg object-contain">
+            <img src="https://h.top4top.io/p_38323ffb62.png" alt="Ilustrasi" class="w-full max-w-lg object-contain">
         </div>
     </header>
 

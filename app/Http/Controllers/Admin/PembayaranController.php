@@ -36,21 +36,43 @@ class PembayaranController extends Controller
 
     public function reject(Pembayaran $pembayaran): RedirectResponse
     {
-        DB::transaction(function () use ($pembayaran) {
-            $user = $pembayaran->user;
+        $user = $pembayaran->user;
 
-            if ($user) {
-                $kamarId = $user->id_kamar;
+        if (! $user) {
+            $pembayaran->delete();
+            return redirect()
+                ->route('admin.dashboard')
+                ->with('success', 'Pembayaran berhasil ditolak.');
+        }
 
-                $pembayaran->delete();
-                $user->delete();
-
-                Kamar::where('id_kamar', $kamarId)->update([
-                    'status' => 'Tersedia',
+        // Penghuni aktif (sudah pernah verifikasi) → jangan hapus akun, reset tagihan saja
+        if ($user->status_pendaftaran === 'aktif') {
+            DB::transaction(function () use ($pembayaran, $user) {
+                // Reset tagihan: hapus bukti, kembalikan ke status menunggu
+                $pembayaran->update([
+                    'bukti_pembayaran' => null,
+                    'status' => 'menunggu',
                 ]);
-            } else {
-                $pembayaran->delete();
-            }
+            });
+
+            // Kirim peringatan ke akun penghuni via session (akan terbaca saat user akses dashboard)
+            session()->flash('peringatan_tolak_' . $user->id_user, 'Pembayaran Anda ditolak. Silakan upload ulang bukti pembayaran yang benar.');
+
+            return redirect()
+                ->route('admin.dashboard')
+                ->with('success', 'Pembayaran ' . $user->name . ' ditolak. Tagihan direset, silakan hubungi penghuni untuk upload ulang.');
+        }
+
+        // Calon penghuni (pending) → hapus semua datanya
+        DB::transaction(function () use ($pembayaran, $user) {
+            $kamarId = $user->id_kamar;
+
+            $pembayaran->delete();
+            $user->delete();
+
+            Kamar::where('id_kamar', $kamarId)->update([
+                'status' => 'Tersedia',
+            ]);
         });
 
         return redirect()

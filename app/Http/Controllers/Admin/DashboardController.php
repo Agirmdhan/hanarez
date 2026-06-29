@@ -22,16 +22,24 @@ class DashboardController extends Controller
             return back()->withErrors(['penghuni' => 'Penghuni tidak valid untuk diingatkan.']);
         }
 
-        $targetMonth = now()->format('Y-m');
+        // Mulai dari bulan depan
+        $targetMonth = now()->addMonth()->format('Y-m');
 
-        $currentMonthPembayaran = Pembayaran::where('id_user', $penghuni->id_user)
-            ->where('bulan', $targetMonth)
-            ->first();
+        // Cari bulan yang belum ada tagihan lunas (maju terus sampai ketemu)
+        for ($attempts = 0; $attempts < 12; $attempts++) {
+            $existing = Pembayaran::where('id_user', $penghuni->id_user)
+                ->where('bulan', $targetMonth)
+                ->first();
 
-        if ($currentMonthPembayaran && $currentMonthPembayaran->status === 'lunas') {
-            $targetMonth = now()->addMonth()->format('Y-m');
+            if (! $existing || $existing->status !== 'lunas') {
+                break;
+            }
+
+            // Kalau bulan ini sudah lunas, lanjut ke bulan berikutnya
+            $targetMonth = date('Y-m', strtotime($targetMonth . '-01 +1 month'));
         }
 
+        // Buat atau set status menunggu untuk bulan target
         $pembayaran = Pembayaran::firstOrNew([
             'id_user' => $penghuni->id_user,
             'bulan' => $targetMonth,
@@ -46,7 +54,7 @@ class DashboardController extends Controller
             'payment_deadline' => now()->addDays(3),
         ]);
 
-        return back()->with('success', 'Tagihan bulan baru sudah dibuat. Status pembayaran direset menjadi menunggu dan bukti pembayaran dihapus.');
+        return back()->with('success', 'Tagihan bulan baru (' . $targetMonth . ') sudah dibuat.');
     }
 
     public function index(): View
