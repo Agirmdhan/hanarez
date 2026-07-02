@@ -13,9 +13,19 @@ class Pembayaran extends Model
     protected $fillable = [
         'id_user',
         'bulan',
+        'nominal',
         'bukti_pembayaran',
         'status',
+        'verified_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'nominal' => 'decimal:2',
+            'verified_at' => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {

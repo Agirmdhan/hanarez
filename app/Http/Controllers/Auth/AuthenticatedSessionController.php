@@ -34,6 +34,10 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
+        if ($request->user()->status_pendaftaran === 'pending') {
+            return redirect()->route('penghuni.pembayaran.pending');
+        }
+
         return redirect()->route('penghuni.dashboard');
     }
 

@@ -30,13 +30,16 @@
             <div class="mt-6">
                 <x-input-label for="password" value="{{ __('Password') }}" class="sr-only" />
 
-                <x-text-input
-                    id="password"
-                    name="password"
-                    type="password"
-                    class="mt-1 block w-3/4"
-                    placeholder="{{ __('Password') }}"
-                />
+                <div class="relative mt-1 w-3/4" x-data="{ showPassword: false }">
+                    <x-text-input
+                        id="password"
+                        name="password"
+                        ::type="showPassword ? 'text' : 'password'"
+                        class="block w-full pr-10"
+                        placeholder="{{ __('Password') }}"
+                    />
+                    <x-password-toggle />
+                </div>
 
                 <x-input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
             </div>

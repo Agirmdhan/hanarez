@@ -1,8 +1,6 @@
-<x-app-layout>
+<x-admin-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Admin Kost') }}
-        </h2>
+        Dashboard Admin Kost
     </x-slot>
 
     <div class="py-10">
@@ -10,6 +8,11 @@
             @if (session('success'))
                 <div class="mb-6 rounded-md bg-green-100 px-4 py-3 text-sm text-green-800">
                     {{ session('success') }}
+                </div>
+            @endif
+            @if (session('error'))
+                <div class="mb-6 rounded-md bg-red-100 px-4 py-3 text-sm text-red-800">
+                    {{ session('error') }}
                 </div>
             @endif
 
@@ -59,7 +62,7 @@
                                     </span>
                                 </div>
 
-                                <div class="mt-4 grid gap-4 lg:grid-cols-2">
+                                <div class="mt-4 grid gap-4 lg:grid-cols-3">
                                     <div class="rounded-md bg-white p-3">
                                         <p class="mb-2 text-sm font-semibold text-gray-800">Bukti Pembayaran</p>
                                         @if ($buktiPending && $buktiPending->bukti_pembayaran)
@@ -73,8 +76,20 @@
                                     </div>
 
                                     <div class="rounded-md bg-white p-3">
+                                        <p class="mb-2 text-sm font-semibold text-gray-800">Syarat & Ketentuan</p>
+                                        @if ($pendingUser->syarat_ketentuan)
+                                            <a href="{{ asset('storage/'.$pendingUser->syarat_ketentuan) }}" target="_blank" class="inline-flex items-center rounded border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100">
+                                                Lihat Dokumen
+                                            </a>
+                                            <p class="mt-2 text-xs text-gray-500">Dokumen sudah diunggah.</p>
+                                        @else
+                                            <p class="text-sm text-gray-500">Belum ada dokumen syarat dan ketentuan.</p>
+                                        @endif
+                                    </div>
+
+                                    <div class="rounded-md bg-white p-3">
                                         <p class="mb-2 text-sm font-semibold text-gray-800">Aksi Admin</p>
-                                        @if ($buktiPending && $buktiPending->bukti_pembayaran)
+                                        @if ($buktiPending && $buktiPending->bukti_pembayaran && $pendingUser->syarat_ketentuan)
                                             <div class="flex flex-wrap gap-2">
                                                 <form method="POST" action="{{ route('admin.pembayaran.verify', $buktiPending) }}">
                                                     @csrf
@@ -93,7 +108,7 @@
                                                 </form>
                                             </div>
                                         @else
-                                            <p class="text-sm text-gray-500">Tombol verifikasi muncul setelah bukti pembayaran diunggah.</p>
+                                            <p class="text-sm text-gray-500">Tombol verifikasi muncul setelah bukti pembayaran dan dokumen syarat & ketentuan diunggah.</p>
                                         @endif
                                     </div>
                                 </div>
@@ -228,4 +243,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-admin-layout>

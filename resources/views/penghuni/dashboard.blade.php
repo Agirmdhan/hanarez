@@ -1,8 +1,6 @@
-<x-app-layout>
+<x-penghuni-layout>
     <x-slot name="header">
-        <h2 class="resident-title">
-            {{ __('Dashboard Penghuni') }}
-        </h2>
+        Dashboard
     </x-slot>
 
     @php
@@ -516,6 +514,45 @@
                 </section>
             </div>
 
+            {{-- Pengumuman dari Admin --}}
+            @if ($pengumumen->isNotEmpty())
+                <section class="resident-card" style="margin-top: 18px;">
+                    <div style="padding: 20px;">
+                        <div class="resident-section-head">
+                            <span class="resident-section-icon" style="background: #dbeafe; color: #1e40af;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                    <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.5-1.8 9.44-3.51a.5.5 0 01.728.445V13.5a.5.5 0 01-.728.445C16.332 12.2 12.932 11 8.832 11H7a4.002 4.002 0 01-1.564-3.317z" stroke="currentColor" stroke-width="1.8"/>
+                                </svg>
+                            </span>
+                            <h3 style="font-size: 20px;">Pengumuman</h3>
+                        </div>
+                        <div style="display: grid; gap: 14px;">
+                            @foreach ($pengumumen as $pengumuman)
+                                <div style="border-radius: 8px; background: #f8fafc; padding: 16px; box-shadow: 0 2px 8px rgba(23,35,53,.08);">
+                                    <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+                                        <div>
+                                            <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #172335;">{{ $pengumuman->judul }}</h4>
+                                            <p style="margin: 8px 0 0; font-size: 14px; color: #27364a; white-space: pre-line;">{{ $pengumuman->konten }}</p>
+                                            <p style="margin: 8px 0 0; font-size: 12px; color: #6b7280;">
+                                                {{ $pengumuman->created_at->format('d M Y') }}
+                                                @if ($pengumuman->user?->name)
+                                                    &middot; {{ $pengumuman->user->name }}
+                                                @endif
+                                            </p>
+                                        </div>
+                                        @if ($pengumuman->tanggal_expired)
+                                            <span style="flex-shrink: 0; border-radius: 6px; background: #fef3c7; padding: 4px 8px; font-size: 11px; font-weight: 600; color: #92400e;">
+                                                {{ $pengumuman->tanggal_expired->format('d M') }}
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </section>
+            @endif
+
             <div class="resident-content-grid">
                 <section class="resident-card resident-panel resident-payment">
                     <div class="resident-section-head">
@@ -647,4 +684,4 @@
             </div>
         </div>
     </div>
-</x-app-layout>
+</x-penghuni-layout>

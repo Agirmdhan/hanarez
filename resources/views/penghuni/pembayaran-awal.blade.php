@@ -42,9 +42,23 @@
             <x-input-error :messages="$errors->get('bukti_pembayaran')" class="mt-2" />
         </div>
 
+        <div class="mt-4">
+            <x-input-label for="syarat_ketentuan" value="Upload Syarat & Ketentuan yang Sudah Diisi" />
+            <input
+                id="syarat_ketentuan"
+                type="file"
+                name="syarat_ketentuan"
+                accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                required
+                class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+            >
+            <p class="mt-1 text-xs text-gray-500">Format PDF, DOC, atau DOCX. Maksimal 5 MB.</p>
+            <x-input-error :messages="$errors->get('syarat_ketentuan')" class="mt-2" />
+        </div>
+
         <div class="mt-6 flex items-center justify-end">
             <x-primary-button>
-                Upload Bukti Pembayaran
+                Upload Dokumen
             </x-primary-button>
         </div>
     </form>

@@ -43,8 +43,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                    onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('open-logout-confirm', { detail: { form: this.closest('form') } }));">
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
@@ -89,12 +88,12 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
+                            onclick="event.preventDefault(); window.dispatchEvent(new CustomEvent('open-logout-confirm', { detail: { form: this.closest('form') } }));">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>
                 </form>
             </div>
         </div>
     </div>
+    <x-logout-confirmation />
 </nav>

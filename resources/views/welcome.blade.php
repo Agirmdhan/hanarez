@@ -35,7 +35,8 @@
 
         <div class="hidden md:flex items-center gap-10">
             <a href="/" class="text-sm font-semibold text-blue-500">Home</a>
-            <a href="https://wa.me/6281234567890" target="_blank" class="text-sm font-medium text-gray-600 hover:text-blue-500">Contact</a>
+            <a href="{{ route('about') }}" class="text-sm font-medium text-gray-600 hover:text-blue-500">About Us</a>
+            <a href="https://wa.me/6285664325521" target="_blank" class="text-sm font-medium text-gray-600 hover:text-blue-500">Contact</a>
         </div>
 
         <div class="flex items-center gap-3">

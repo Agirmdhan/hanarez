@@ -61,6 +61,34 @@ class ProfileTest extends TestCase
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
+    public function test_resident_profile_data_can_be_saved(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this
+            ->actingAs($user)
+            ->patch('/profile', [
+                'name' => $user->name,
+                'email' => $user->email,
+                'nik' => '1234567890123456',
+                'no_telepon' => '081234567890',
+                'alamat' => 'Jalan Melati Nomor 10',
+                'kontak_darurat' => '081298765432',
+            ]);
+
+        $response
+            ->assertSessionHasNoErrors()
+            ->assertRedirect('/profile');
+
+        $this->assertDatabaseHas('penghunis', [
+            'id_user' => $user->id_user,
+            'nik' => '1234567890123456',
+            'no_telepon' => '081234567890',
+            'alamat' => 'Jalan Melati Nomor 10',
+            'kontak_darurat' => '081298765432',
+        ]);
+    }
+
     public function test_user_can_delete_their_account(): void
     {
         $user = User::factory()->create();

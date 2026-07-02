@@ -46,7 +46,9 @@ class DashboardController extends Controller
         ]);
 
         if (! $pembayaran->exists || $pembayaran->status !== 'lunas') {
+            $pembayaran->nominal = 1900000;
             $pembayaran->status = 'menunggu';
+            $pembayaran->verified_at = null;
             $pembayaran->save();
         }
 

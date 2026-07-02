@@ -12,8 +12,19 @@ class PembayaranController extends Controller
 {
     public function verify(Pembayaran $pembayaran): RedirectResponse
     {
+        $user = $pembayaran->user;
+
+        if ($user?->status_pendaftaran === 'pending' && ! $user->syarat_ketentuan) {
+            return redirect()
+                ->route('admin.dashboard')
+                ->with('error', 'Dokumen syarat dan ketentuan belum diunggah.');
+        }
+
         DB::transaction(function () use ($pembayaran) {
-            $pembayaran->update(['status' => 'lunas']);
+            $pembayaran->update([
+                'status' => 'lunas',
+                'verified_at' => now(),
+            ]);
 
             $user = $pembayaran->user;
 
@@ -52,6 +63,7 @@ class PembayaranController extends Controller
                 $pembayaran->update([
                     'bukti_pembayaran' => null,
                     'status' => 'menunggu',
+                    'verified_at' => null,
                 ]);
             });
 

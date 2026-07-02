@@ -5,7 +5,7 @@
         </h2>
 
         <p class="mt-1 text-sm text-gray-600">
-            {{ __("Update your account's profile information and email address.") }}
+            Perbarui informasi akun dan data diri Anda.
         </p>
     </header>
 
@@ -47,18 +47,40 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-4">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+        @if ($user->role === 'penghuni')
+            <div class="border-t border-gray-200 pt-6">
+                <h3 class="text-base font-medium text-gray-900">Data Penghuni</h3>
+                <p class="mt-1 text-sm text-gray-600">Lengkapi data berikut sesuai identitas Anda.</p>
+            </div>
 
-            @if (session('status') === 'profile-updated')
-                <p
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-transition
-                    x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
-                >{{ __('Saved.') }}</p>
-            @endif
+            <div>
+                <x-input-label for="nik" value="NIK" />
+                <x-text-input id="nik" name="nik" type="text" inputmode="numeric" maxlength="16" class="mt-1 block w-full" :value="old('nik', $user->penghuni?->nik)" required autocomplete="off" />
+                <x-input-error class="mt-2" :messages="$errors->get('nik')" />
+            </div>
+
+            <div>
+                <x-input-label for="no_telepon" value="Nomor Telepon" />
+                <x-text-input id="no_telepon" name="no_telepon" type="tel" inputmode="numeric" maxlength="15" class="mt-1 block w-full" :value="old('no_telepon', $user->penghuni?->no_telepon)" required autocomplete="tel" />
+                <x-input-error class="mt-2" :messages="$errors->get('no_telepon')" />
+            </div>
+
+            <div>
+                <x-input-label for="alamat" value="Alamat" />
+                <textarea id="alamat" name="alamat" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">{{ old('alamat', $user->penghuni?->alamat) }}</textarea>
+                <x-input-error class="mt-2" :messages="$errors->get('alamat')" />
+            </div>
+
+            <div>
+                <x-input-label for="kontak_darurat" value="Kontak Darurat" />
+                <x-text-input id="kontak_darurat" name="kontak_darurat" type="tel" inputmode="numeric" maxlength="15" class="mt-1 block w-full" :value="old('kontak_darurat', $user->penghuni?->kontak_darurat)" autocomplete="tel" />
+                <p class="mt-1 text-xs text-gray-500">Opsional. Masukkan nomor keluarga atau wali yang dapat dihubungi.</p>
+                <x-input-error class="mt-2" :messages="$errors->get('kontak_darurat')" />
+            </div>
+        @endif
+
+        <div class="flex items-center gap-4">
+            <x-primary-button>Simpan Profil</x-primary-button>
         </div>
     </form>
 </section>

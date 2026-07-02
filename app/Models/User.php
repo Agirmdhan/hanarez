@@ -28,6 +28,7 @@ class User extends Authenticatable
         'role',
         'status',
         'status_pendaftaran',
+        'syarat_ketentuan',
         'payment_deadline',
         'payment_completed_at',
     ];
@@ -57,6 +58,11 @@ class User extends Authenticatable
     public function kamar(): BelongsTo
     {
         return $this->belongsTo(Kamar::class, 'id_kamar', 'id_kamar');
+    }
+
+    public function penghuni(): HasOne
+    {
+        return $this->hasOne(Penghuni::class, 'id_user', 'id_user');
     }
 
     public function pembayarans(): HasMany
@@ -97,6 +103,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'payment_deadline' => 'datetime',
+            'payment_completed_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
