@@ -636,7 +636,7 @@
                             <h3>Buat Laporan Kerusakan/Keluhan</h3>
                         </div>
 
-                        <form method="POST" action="{{ route('penghuni.laporan.store') }}" class="resident-form">
+                        <form method="POST" action="{{ route('penghuni.laporan.store') }}" class="resident-form" enctype="multipart/form-data">
                             @csrf
                             <div class="resident-field">
                                 <label for="judul">Judul</label>
@@ -646,6 +646,40 @@
                                 <label for="deskripsi">Deskripsi</label>
                                 <textarea id="deskripsi" name="deskripsi" placeholder="Ceritakan detailnya di sini..." required>{{ old('deskripsi') }}</textarea>
                             </div>
+                            <div id="foto-container">
+                                <div class="resident-field foto-item">
+                                    <label>Upload Bukti Kerusakan (wajib 1 foto)</label>
+                                    <input type="file" name="foto[]" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" required onchange="tambahInputFoto(this)">
+                                </div>
+                            </div>
+                            <div id="foto-info" style="font-size: 13px; color: #6b7280; margin-top: 4px;">Belum ada file dipilih</div>
+                            <script>
+                            function tambahInputFoto(el) {
+                                if (el.files.length > 0) {
+                                    let info = document.getElementById('foto-info');
+                                    let total = document.querySelectorAll('.foto-item input[type=file]').length;
+                                    let nama = el.files[0].name;
+                                    if (total === 1) {
+                                        info.textContent = nama;
+                                    } else {
+                                        let arr = [];
+                                        document.querySelectorAll('.foto-item input[type=file]').forEach(function(inp) {
+                                            if (inp.files[0]) arr.push(inp.files[0].name);
+                                        });
+                                        info.textContent = arr.join(', ');
+                                    }
+
+                                    if (!el.dataset.used) {
+                                        el.dataset.used = '1';
+                                        let container = document.getElementById('foto-container');
+                                        let wrapper = document.createElement('div');
+                                        wrapper.className = 'resident-field foto-item';
+                                        wrapper.innerHTML = '<label style="margin-top:10px;">Tambah Foto Lainnya (opsional)</label><input type="file" name="foto[]" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp" onchange="tambahInputFoto(this)">';
+                                        container.appendChild(wrapper);
+                                    }
+                                }
+                            }
+                            </script>
                             <button class="resident-button" type="submit">
                                 Kirim Laporan
                             </button>
@@ -660,10 +694,10 @@
                                     <path d="M9 8h6M9 12h6M9 16h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                                 </svg>
                             </span>
-                            <h3>Keluhan Aktif</h3>
+                            <h3>Laporan Kamu</h3>
                         </div>
 
-                        <p>{{ $laporanAktif->count() === 0 ? 'Belum ada laporan kerusakan atau keluhan aktif.' : 'Laporan yang masih diproses admin.' }}</p>
+                        <p>{{ $laporanAktif->count() === 0 ? 'Belum ada laporan kerusakan atau keluhan aktif.' : 'Laporan yang sedang diproses:' }}</p>
 
                         <div class="resident-complaint-list">
                             @forelse ($laporanAktif as $laporan)
@@ -671,7 +705,13 @@
                                     <span class="resident-complaint-mark">!</span>
                                     <strong>{{ $laporan->judul }}</strong>
                                     <span>-</span>
-                                    <span class="resident-complaint-status">Diproses</span>
+                                    <span class="resident-complaint-status">
+                                        @if ($laporan->status === 'aktif')
+                                            Menunggu
+                                        @elseif ($laporan->status === 'proses')
+                                            Diproses
+                                        @endif
+                                    </span>
                                 </div>
                             @empty
                                 <div class="resident-empty">

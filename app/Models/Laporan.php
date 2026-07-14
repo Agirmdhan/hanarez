@@ -10,12 +10,22 @@ class Laporan extends Model
     protected $table = 'laporans';
     protected $primaryKey = 'id_laporan';
 
+    public function getRouteKeyName(): string
+    {
+        return 'id_laporan';
+    }
+
     protected $fillable = [
         'id_user',
         'id_kamar',
         'judul',
         'deskripsi',
+        'foto',
         'status',
+    ];
+
+    protected $casts = [
+        'foto' => 'array',
     ];
 
     public function user(): BelongsTo

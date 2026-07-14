@@ -91,7 +91,7 @@ class User extends Authenticatable
     public function laporanAktif(): HasMany
     {
         return $this->hasMany(Laporan::class, 'id_user', 'id_user')
-            ->where('status', 'aktif');
+            ->whereIn('status', ['aktif', 'proses']);
     }
 
     /**

@@ -10,6 +10,11 @@ class Pembayaran extends Model
     protected $table = 'pembayarans';
     protected $primaryKey = 'id_pembayaran';
 
+    public function getRouteKeyName(): string
+    {
+        return 'id_pembayaran';
+    }
+
     protected $fillable = [
         'id_user',
         'bulan',

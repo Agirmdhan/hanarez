@@ -22,8 +22,8 @@ class DashboardController extends Controller
             return back()->withErrors(['penghuni' => 'Penghuni tidak valid untuk diingatkan.']);
         }
 
-        // Mulai dari bulan depan
-        $targetMonth = now()->addMonth()->format('Y-m');
+        // Mulai dari bulan ini
+        $targetMonth = now()->format('Y-m');
 
         // Cari bulan yang belum ada tagihan lunas (maju terus sampai ketemu)
         for ($attempts = 0; $attempts < 12; $attempts++) {
@@ -68,7 +68,7 @@ class DashboardController extends Controller
             'penghuni.pembayaranTagihanAktif',
             'penghuni.pembayaranBulanIni',
             'penghuni.pembayarans' => fn ($query) => $query->orderByDesc('bulan'),
-            'penghuni.laporanAktif' => fn ($query) => $query->latest(),
+            'penghuni.laporans' => fn ($query) => $query->latest(),
         ])
             ->orderBy('nomor_kamar')
             ->get();

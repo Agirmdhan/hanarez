@@ -122,10 +122,17 @@
                 @foreach ($kamars as $kamar)
                     @php
                         $penghuni = $kamar->penghuni;
-                        // Prioritaskan tagihan aktif (status=menunggu, dari remind bulan depan)
+                        // Prioritaskan tagihan aktif (status=menunggu, untuk verifikasi/tolak)
                         // Fallback ke pembayaran bulan ini
-                        $pembayaran = $penghuni?->pembayaranTagihanAktif ?? $penghuni?->pembayaranBulanIni;
-                        $laporans = $penghuni?->laporanAktif ?? collect();
+                        // Fallback ke pembayaran terakhir (agar status "sudah dibayar" tetap tampil setelah verifikasi)
+                        $pembayaranTerakhir = $penghuni ? $penghuni->pembayarans()->latest('bulan')->first() : null;
+                        $pembayaran = $penghuni?->pembayaranTagihanAktif
+                            ?? $penghuni?->pembayaranBulanIni
+                            ?? $pembayaranTerakhir;
+                        // Hanya tampilkan laporan yang masih aktif/diproses (riwayat selesai/dibatalkan tidak ditampilkan)
+                        $laporans = $penghuni
+                            ? $penghuni->laporans()->whereIn('status', ['aktif', 'proses'])->latest()->get()
+                            : collect();
                     @endphp
 
                     <div class="bg-white rounded-lg shadow">
@@ -207,21 +214,62 @@
                                 </div>
 
                                 <div>
-                                    <p class="mb-2 text-sm font-semibold text-gray-800">Keluhan Aktif</p>
+                                    <p class="mb-2 text-sm font-semibold text-gray-800">Keluhan / Laporan</p>
                                     @forelse ($laporans as $laporan)
                                         <div class="mb-3 rounded-md border border-red-200 bg-red-50 p-3">
                                             <p class="font-medium text-gray-900">{{ $laporan->judul }}</p>
                                             <p class="mt-1 text-sm text-gray-600">{{ $laporan->deskripsi }}</p>
-                                            <form method="POST" action="{{ route('admin.laporan.complete', $laporan) }}" class="mt-3">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button class="rounded bg-gray-800 px-3 py-1 text-xs font-semibold text-white hover:bg-gray-700" type="submit">
-                                                    Tandai selesai
-                                                </button>
-                                            </form>
+                                            @if ($laporan->foto && count($laporan->foto) > 0)
+                                                <div class="mt-2 flex flex-wrap gap-2">
+                                                    @foreach ($laporan->foto as $index => $fotoPath)
+                                                        <a href="{{ asset('storage/'.$fotoPath) }}" target="_blank" class="inline-flex items-center rounded border border-indigo-200 bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 hover:bg-indigo-100">
+                                                            Lihat Foto {{ $index + 1 }}
+                                                        </a>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                            <div class="mt-3 flex flex-wrap gap-2">
+                                                @if ($laporan->status === 'aktif')
+                                                    <form method="POST" action="{{ route('admin.laporan.proses', $laporan) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="rounded bg-yellow-500 px-3 py-1 text-xs font-semibold text-white hover:bg-yellow-600" type="submit">
+                                                            Proses
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                                @if ($laporan->status === 'aktif' || $laporan->status === 'proses')
+                                                    <form method="POST" action="{{ route('admin.laporan.selesai', $laporan) }}">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="rounded bg-green-600 px-3 py-1 text-xs font-semibold text-white hover:bg-green-700" type="submit">
+                                                            Selesai
+                                                        </button>
+                                                    </form>
+                                                    <form method="POST" action="{{ route('admin.laporan.batalkan', $laporan) }}" onsubmit="return confirm('Batalkan laporan ini? Bukti dianggap fiktif.')">
+                                                        @csrf
+                                                        @method('PATCH')
+                                                        <button class="rounded bg-red-600 px-3 py-1 text-xs font-semibold text-white hover:bg-red-700" type="submit">
+                                                            Batalkan (Fiktif)
+                                                        </button>
+                                                    </form>
+                                                @endif
+                                            </div>
+                                            <p class="mt-2 text-xs text-gray-500">
+                                                Status: 
+                                                @if ($laporan->status === 'aktif')
+                                                    <span class="font-semibold text-red-600">Aktif</span>
+                                                @elseif ($laporan->status === 'proses')
+                                                    <span class="font-semibold text-yellow-600">Diproses</span>
+                                                @elseif ($laporan->status === 'selesai')
+                                                    <span class="font-semibold text-green-600">Selesai</span>
+                                                @elseif ($laporan->status === 'dibatalkan')
+                                                    <span class="font-semibold text-gray-600">Dibatalkan</span>
+                                                @endif
+                                            </p>
                                         </div>
                                     @empty
-                                        <p class="text-sm text-gray-500">Tidak ada keluhan aktif.</p>
+                                        <p class="text-sm text-gray-500">Tidak ada laporan.</p>
                                     @endforelse
                                 </div>
 

@@ -56,7 +56,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::put('/kamar/{kamar}', [KamarController::class, 'update'])->name('admin.kamar.update');
     Route::patch('/pembayaran/{pembayaran}/verify', [AdminPembayaranController::class, 'verify'])->name('admin.pembayaran.verify');
     Route::patch('/pembayaran/{pembayaran}/reject', [AdminPembayaranController::class, 'reject'])->name('admin.pembayaran.reject');
-    Route::patch('/laporan/{laporan}/complete', [AdminLaporanController::class, 'complete'])->name('admin.laporan.complete');
+    Route::patch('/laporan/{laporan}/proses', [AdminLaporanController::class, 'proses'])->name('admin.laporan.proses');
+    Route::patch('/laporan/{laporan}/selesai', [AdminLaporanController::class, 'selesai'])->name('admin.laporan.selesai');
+    Route::patch('/laporan/{laporan}/batalkan', [AdminLaporanController::class, 'batalkan'])->name('admin.laporan.batalkan');
     Route::delete('/penghuni/{penghuni}', [AdminPenghuniController::class, 'destroy'])->name('admin.penghuni.destroy');
 
     Route::get('/pengumuman', [AdminPengumumanController::class, 'index'])->name('admin.pengumuman.index');
